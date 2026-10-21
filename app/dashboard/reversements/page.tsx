@@ -12,9 +12,15 @@ interface PayoutHistory {
   accountNumber: string
   fee: number
   netAmount: number
-  status: 'completed' | 'processing'
+  status: 'completed' | 'processing' | 'failed'
   date: string
 }
+
+const PAYOUT_FREQUENCIES = [
+  { id: 'daily', label: 'Quotidien', desc: 'Chaque matin à 09:00', icon: '⚡' },
+  { id: 'weekly', label: 'Hebdo', desc: 'Tous les lundis matin', icon: '📅' },
+  { id: 'monthly', label: 'Mensuel', desc: 'Le 1er de chaque mois', icon: '🗓️' },
+]
 
 const INITIAL_PAYOUTS: PayoutHistory[] = [
   {
@@ -23,8 +29,8 @@ const INITIAL_PAYOUTS: PayoutHistory[] = [
     amount: 1250000,
     destination: 'Moov Money Marchand',
     accountNumber: '+229 01 95 00 22 33',
-    fee: 1250,
-    netAmount: 1248750,
+    fee: 12500,
+    netAmount: 1237500,
     status: 'completed',
     date: '19 Oct 2026 à 14:20',
   },
@@ -34,8 +40,8 @@ const INITIAL_PAYOUTS: PayoutHistory[] = [
     amount: 3500000,
     destination: 'Virement Bancaire (BOA Bénin)',
     accountNumber: 'BJ061 01001 002345678901 22',
-    fee: 3500,
-    netAmount: 3496500,
+    fee: 500,
+    netAmount: 3499500,
     status: 'completed',
     date: '17 Oct 2026 à 09:30',
   },
@@ -45,21 +51,10 @@ const INITIAL_PAYOUTS: PayoutHistory[] = [
     amount: 1850000,
     destination: 'MTN Mobile Money Marchand',
     accountNumber: '+229 01 97 00 11 22',
-    fee: 1850,
-    netAmount: 1848150,
-    status: 'completed',
+    fee: 18500,
+    netAmount: 1831500,
+    status: 'failed',
     date: '10 Oct 2026 à 10:15',
-  },
-  {
-    id: 'po_9869',
-    ref: '#REV-2026-101',
-    amount: 850000,
-    destination: 'Celtiis Cash Marchand',
-    accountNumber: '+229 01 40 00 33 44',
-    fee: 850,
-    netAmount: 849150,
-    status: 'completed',
-    date: '03 Oct 2026 à 09:00',
   },
 ]
 
@@ -69,7 +64,16 @@ export default function DashboardReversementsPage() {
   const [showModal, setShowModal] = useState(false)
   const [payoutAmount, setPayoutAmount] = useState('')
   const [destination, setDestination] = useState('bank')
+  const [frequency, setFrequency] = useState('daily')
   const [requestSuccess, setRequestSuccess] = useState(false)
+
+  const calculateFees = (amt: number, dest: string) => {
+    if (dest === 'bank') return 500
+    return Math.round(amt * 0.01) // 1% for Mobile Money
+  }
+
+  const currentFee = payoutAmount ? calculateFees(parseInt(payoutAmount, 10), destination) : 0
+  const netToReceive = payoutAmount ? parseInt(payoutAmount, 10) - currentFee : 0
 
   const handleRequestPayout = (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +87,7 @@ export default function DashboardReversementsPage() {
       celtiis: { label: 'Celtiis Cash Marchand', acc: '+229 01 40 00 33 44' },
     }
     const chosen = destinationMap[destination] || destinationMap.bank
+    const fees = calculateFees(amt, destination)
 
     const newPayout: PayoutHistory = {
       id: `po_${Date.now()}`,
@@ -90,8 +95,8 @@ export default function DashboardReversementsPage() {
       amount: amt,
       destination: chosen.label,
       accountNumber: chosen.acc,
-      fee: Math.round(amt * 0.001),
-      netAmount: amt - Math.round(amt * 0.001),
+      fee: fees,
+      netAmount: amt - fees,
       status: 'processing',
       date: 'À l’instant',
     }
@@ -148,11 +153,32 @@ export default function DashboardReversementsPage() {
           </span>
         </div>
 
-        <div className="kpi-card">
-          <small>Fréquence actuelle</small>
-          <strong>Quotidienne (J+1)</strong>
-          <span className="kpi-trend trend-neutral">
-            Virement auto chaque matin à 09h00
+        <div className="kpi-card" style={{ borderLeft: '4px solid var(--orange)' }}>
+          <small>Planification de virement</small>
+          <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+            {PAYOUT_FREQUENCIES.map(f => (
+              <button
+                key={f.id}
+                onClick={() => setFrequency(f.id)}
+                style={{
+                  flex: 1,
+                  padding: '6px 4px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  border: '1px solid var(--line)',
+                  background: frequency === f.id ? 'var(--blue)' : 'white',
+                  color: frequency === f.id ? 'white' : 'var(--text)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {f.icon} {f.label}
+              </button>
+            ))}
+          </div>
+          <span className="kpi-trend trend-neutral" style={{ marginTop: '10px' }}>
+            {PAYOUT_FREQUENCIES.find(f => f.id === frequency)?.desc}
           </span>
         </div>
       </div>
@@ -208,9 +234,21 @@ export default function DashboardReversementsPage() {
                     </span>
                   </td>
                   <td>
-                    <span className={`status ${p.status === 'completed' ? 'success' : 'pending'}`}>
-                      <i /> {p.status === 'completed' ? 'Viré' : 'En traitement'}
-                    </span>
+                    {p.status === 'completed' && (
+                      <span className="status success">
+                        <Icon name="check" size={12} /> Viré
+                      </span>
+                    )}
+                    {p.status === 'processing' && (
+                      <span className="status pending" style={{ animation: 'pulse 2s infinite' }}>
+                        <Icon name="clock" size={12} /> Traitement
+                      </span>
+                    )}
+                    {p.status === 'failed' && (
+                      <span className="status error" style={{ background: '#fee2e2', color: '#dc2626' }}>
+                        <Icon name="x" size={12} /> Échoué
+                      </span>
+                    )}
                   </td>
                   <td>
                     <span style={{ color: 'var(--muted)', fontSize: '12px' }}>{p.date}</span>
@@ -282,6 +320,31 @@ export default function DashboardReversementsPage() {
                     <option value="celtiis">🟣 Celtiis Cash Marchand (+229 01 40 00 33 44)</option>
                   </select>
                 </div>
+
+                {/* Simulateur de frais */}
+                {payoutAmount && parseInt(payoutAmount) > 0 && (
+                  <div style={{
+                    background: 'var(--blue-soft)',
+                    padding: '16px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(14, 56, 100, 0.1)',
+                    marginTop: '20px',
+                    fontSize: '13px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: 'var(--blue)' }}>
+                      <span>Montant brut</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)' }}>{parseInt(payoutAmount).toLocaleString('fr-FR')} F</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px dashed rgba(14, 56, 100, 0.2)', color: '#dc2626' }}>
+                      <span>Frais de service ({destination === 'bank' ? 'Fixes' : '1.0%'})</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)' }}>-{currentFee.toLocaleString('fr-FR')} F</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '15px', color: 'var(--blue)' }}>
+                      <span>Net à recevoir</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)' }}>{netToReceive.toLocaleString('fr-FR')} F CFA</span>
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
                   <button

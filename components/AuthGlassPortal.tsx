@@ -7,7 +7,7 @@ import { Icon } from './Icon'
 import { Logo } from './Logo'
 import { OperatorLogo } from './OperatorLogo'
 import { ButtonSpinner } from './ui/ButtonSpinner'
-import { FintechLiveBackground } from './FintechLiveBackground'
+import { HeroWeatherBackground } from './HeroWeatherBackground'
 
 interface AuthGlassPortalProps {
   initialTab?: 'login' | 'signup'
@@ -56,7 +56,7 @@ export function AuthGlassPortal({ initialTab = 'login' }: AuthGlassPortalProps) 
   return (
     <main className="auth-page-main">
       {/* Background Animated Atmosphere (Ganvié Neo-Pirogue, Money Rain & Gold River) */}
-      <FintechLiveBackground />
+      <HeroWeatherBackground />
 
       {/* Main Liquid Glass Shell */}
       <div
@@ -140,11 +140,7 @@ export function AuthGlassPortal({ initialTab = 'login' }: AuthGlassPortalProps) 
               </div>
             </div>
 
-            {/* Live Status indicator */}
-            <div className="live-status-pill">
-              <span className="live-dot" />
-              <span>Systèmes opérationnels & conforme UEMOA</span>
-            </div>
+
           </div>
 
           {/* ========================================================= */}

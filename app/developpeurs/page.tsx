@@ -1,6 +1,6 @@
 import { Button } from '@/components/Button'
 import { CodeWindow } from '@/components/CodeWindow'
-import { FintechLiveBackground } from '@/components/FintechLiveBackground'
+import { HeroWeatherBackground } from '@/components/HeroWeatherBackground'
 import { Icon } from '@/components/Icon'
 import type { Metadata } from 'next'
 
@@ -14,7 +14,7 @@ export default function DeveloppeursPage() {
   return (
     <main>
       <section className="subpage-hero">
-        <FintechLiveBackground />
+        <HeroWeatherBackground />
         <div className="container subpage-hero-inner">
           <h1>Une API REST pensée pour les développeurs modernes</h1>
           <p>

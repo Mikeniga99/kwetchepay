@@ -13,9 +13,12 @@ export default function DashboardTransactionsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [channelFilter, setChannelFilter] = useState<string>('all')
+  const [dateFrom, setDateFrom] = useState<string>('')
+  const [dateTo, setDateTo] = useState<string>('')
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showPushModal, setShowPushModal] = useState(false)
+  const [showRefundConfirm, setShowRefundConfirm] = useState(false)
 
   const handleRefresh = () => {
     setIsLoading(true)
@@ -38,9 +41,22 @@ export default function DashboardTransactionsPage() {
       const matchChannel =
         channelFilter === 'all' || tx.channel === (channelFilter as PaymentChannel)
 
-      return matchSearch && matchStatus && matchChannel
+      // Date range filter: tx.date is in format "DD/MM/YYYY" — convert for comparison
+      let matchDate = true
+      if (dateFrom || dateTo) {
+        const parts = tx.date.split('/')
+        const txDate = parts.length === 3
+          ? new Date(`${parts[2]}-${parts[1]}-${parts[0]}`)
+          : null
+        if (txDate) {
+          if (dateFrom && txDate < new Date(dateFrom)) matchDate = false
+          if (dateTo && txDate > new Date(dateTo)) matchDate = false
+        }
+      }
+
+      return matchSearch && matchStatus && matchChannel && matchDate
     })
-  }, [transactions, search, statusFilter, channelFilter])
+  }, [transactions, search, statusFilter, channelFilter, dateFrom, dateTo])
 
   const handleExportCSV = () => {
     const headers = ['Reference,Client,Telephone,Operateur,Montant_Brut,Frais,Montant_Net,Statut,Date,Heure\n']
@@ -104,7 +120,7 @@ export default function DashboardTransactionsPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <select
               className="form-control"
               style={{ height: '40px', width: 'auto', minWidth: '140px', fontSize: '13px' }}
@@ -128,6 +144,36 @@ export default function DashboardTransactionsPage() {
               <option value="Moov Money">Moov Money</option>
               <option value="Celtiis Cash">Celtiis Cash</option>
             </select>
+
+            {/* Date range filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <label style={{ fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>Du</label>
+              <input
+                type="date"
+                className="form-control"
+                style={{ height: '40px', width: '140px', fontSize: '13px' }}
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+              <label style={{ fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>au</label>
+              <input
+                type="date"
+                className="form-control"
+                style={{ height: '40px', width: '140px', fontSize: '13px' }}
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+              {(dateFrom || dateTo) && (
+                <button
+                  className="button button-secondary"
+                  style={{ height: '40px', padding: '0 10px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                  onClick={() => { setDateFrom(''); setDateTo('') }}
+                  title="Réinitialiser les dates"
+                >
+                  ✕ Dates
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -284,14 +330,107 @@ export default function DashboardTransactionsPage() {
               </div>
             </div>
 
-            <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+            {/* Aperçu reçu PDF simulé */}
+            <div style={{
+              margin: '16px 0',
+              border: '1.5px dashed var(--line)',
+              borderRadius: '10px',
+              padding: '16px',
+              background: '#fafbfc',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Watermark stamp */}
+              {selectedTx.status === 'success' && (
+                <div style={{
+                  position: 'absolute', top: '50%', right: '20px',
+                  transform: 'translateY(-50%) rotate(-12deg)',
+                  border: '3px solid #16a34a', borderRadius: '6px',
+                  color: '#16a34a', fontWeight: 900, fontSize: '18px',
+                  padding: '4px 10px', opacity: 0.18, letterSpacing: '2px',
+                  pointerEvents: 'none'
+                }}>PAYÉ</div>
+              )}
+              {selectedTx.status === 'failed' && (
+                <div style={{
+                  position: 'absolute', top: '50%', right: '20px',
+                  transform: 'translateY(-50%) rotate(-12deg)',
+                  border: '3px solid #dc2626', borderRadius: '6px',
+                  color: '#dc2626', fontWeight: 900, fontSize: '18px',
+                  padding: '4px 10px', opacity: 0.18, letterSpacing: '2px',
+                  pointerEvents: 'none'
+                }}>ANNULÉ</div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#0E3864', letterSpacing: '0.5px' }}>KwêTché Pay — REÇU</div>
+                  <div style={{ fontSize: '10px', color: 'var(--muted)' }}>www.kwetchepay.bj | RCCM : BJ-COT-2025-A-0421</div>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', textAlign: 'right' }}>
+                  <div>{selectedTx.date}</div>
+                  <div>{selectedTx.time}</div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--line)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--muted)' }}>Référence</span>
+                  <code style={{ fontSize: '11px' }}>{selectedTx.ref}</code>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--muted)' }}>Bénéficiaire (Marchand)</span>
+                  <b>Mon Commerce</b>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--muted)' }}>Payeur</span>
+                  <span>{selectedTx.customerName} — {selectedTx.customerPhone}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--muted)' }}>Via</span>
+                  <span>{selectedTx.channel}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--line)', paddingTop: '6px', marginTop: '4px' }}>
+                  <b>Montant Total</b>
+                  <b style={{ color: '#0E3864' }}>{selectedTx.amount.toLocaleString('fr-FR')} F CFA</b>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--muted)' }}>Commission plateforme</span>
+                  <span style={{ color: 'var(--muted)' }}>- {selectedTx.fee.toLocaleString('fr-FR')} F CFA</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: 'var(--green)' }}>
+                  <span>Net crédité marchand</span>
+                  <span>{selectedTx.netAmount.toLocaleString('fr-FR')} F CFA</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <button
                 className="button button-primary"
                 style={{ flex: 1, minHeight: '40px', fontSize: '12px' }}
-                onClick={() => alert(`Téléchargement du reçu ${selectedTx.ref} (Simulation front-end)`)}
+                onClick={() => alert(`Téléchargement du reçu ${selectedTx.ref} — Simulation front-end`)}
               >
-                Imprimer le reçu
+                📄 Télécharger le reçu
               </button>
+
+              {selectedTx.status === 'success' && (
+                <button
+                  className="button button-secondary"
+                  style={{
+                    minHeight: '40px', fontSize: '12px',
+                    border: '1.5px solid #dc2626', color: '#dc2626',
+                    background: '#fff5f5'
+                  }}
+                  onClick={() => {
+                    setShowRefundConfirm(true)
+                  }}
+                >
+                  ↩ Remboursement / Litige
+                </button>
+              )}
+
               <button
                 className="button button-light"
                 style={{ minHeight: '40px', fontSize: '12px' }}
@@ -300,6 +439,45 @@ export default function DashboardTransactionsPage() {
                 Fermer
               </button>
             </div>
+
+            {/* Refund confirm mini-section */}
+            {showRefundConfirm && selectedTx.status === 'success' && (
+              <div style={{
+                marginTop: '12px', padding: '14px', borderRadius: '10px',
+                background: '#fff5f5', border: '1.5px solid #fca5a5'
+              }}>
+                <div style={{ fontWeight: 700, color: '#dc2626', marginBottom: '6px', fontSize: '13px' }}>
+                  ⚠️ Initier un remboursement ou signaler un litige
+                </div>
+                <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 10px' }}>
+                  Cette action sera transmise à l'équipe KwêTché Pay pour traitement sous 48h ouvrables. 
+                  Le client sera notifié par SMS.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="button"
+                    style={{
+                      background: '#dc2626', color: '#fff',
+                      border: 'none', minHeight: '36px', fontSize: '12px', flex: 1
+                    }}
+                    onClick={() => {
+                      alert(`Demande de remboursement pour ${selectedTx.ref} envoyée. L'équipe KwêTché Pay traitera votre demande sous 48h ouvrables.`)
+                      setShowRefundConfirm(false)
+                      setSelectedTx(null)
+                    }}
+                  >
+                    Confirmer le remboursement
+                  </button>
+                  <button
+                    className="button button-secondary"
+                    style={{ minHeight: '36px', fontSize: '12px' }}
+                    onClick={() => setShowRefundConfirm(false)}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

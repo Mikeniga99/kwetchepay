@@ -32,7 +32,7 @@ export function Logo({ light = false, size = 'md', stacked = false }: LogoProps)
         priority
       />
       <span className="logo-text-brand" style={{ fontSize: current.fontSize }}>
-        <span style={{ color: light ? '#ffffff' : '#000000', fontWeight: 800 }}>KwêTché</span>
+        <span style={{ color: light ? '#ffffff' : '#0E3864', fontWeight: 800 }}>KwêTché</span>
         <span style={{ color: 'var(--orange)', fontWeight: 800 }}>Pay</span>
       </span>
     </Link>

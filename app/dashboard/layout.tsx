@@ -10,10 +10,12 @@ import { useState, type ReactNode } from 'react'
 import { DashboardProvider, useDashboard } from './dashboard-context'
 
 const navLinks = [
-  { href: '/dashboard', label: 'Vue d’ensemble', icon: 'bars' as const },
+  { href: '/dashboard', label: "Vue d'ensemble", icon: 'bars' as const },
   { href: '/dashboard/transactions', label: 'Transactions', icon: 'card' as const },
   { href: '/dashboard/liens', label: 'Liens de paiement', icon: 'link' as const },
   { href: '/dashboard/reversements', label: 'Reversements', icon: 'trend' as const },
+  { href: '/dashboard/clients', label: 'Clients & Contacts', icon: 'users' as const },
+  { href: '/dashboard/rapports', label: 'Rapports & Exports', icon: 'bars' as const },
   { href: '/dashboard/developpeurs', label: 'Développeurs & API', icon: 'code' as const },
   { href: '/dashboard/parametres', label: 'Paramètres', icon: 'shield' as const },
 ]
@@ -48,7 +50,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
         {/* Sidebar */}
         <aside className={`dash-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
           <div className="dash-sidebar-header">
-            <Logo />
+            <Logo light />
             <button
               className="dash-menu-toggle"
               onClick={() => setSidebarOpen(false)}
@@ -59,17 +61,25 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
           </div>
 
           {/* Sandbox / Production Mode Switcher */}
-          <div
+          <button
+            type="button"
             className={`dash-mode-banner ${isLive ? 'mode-production' : 'mode-sandbox'}`}
             onClick={() => setIsLive(!isLive)}
             title="Cliquer pour changer d'environnement"
+            aria-label={`Environnement ${isLive ? 'production' : 'de test'}. Basculer vers ${isLive ? 'le mode test' : 'la production'}`}
+            aria-pressed={isLive}
           >
-            <span className="dash-mode-badge">
-              <i />
-              {isLive ? 'MODE PRODUCTION' : 'MODE TEST (SANDBOX)'}
+            <span className="dash-mode-copy">
+              <span className="dash-mode-caption">Simulation</span>
+              <span className="dash-mode-badge">
+                <i />
+                {isLive ? 'Production' : 'Test'}
+              </span>
             </span>
-            <span style={{ fontSize: '10px', opacity: 0.8 }}>BASCULER ⇄</span>
-          </div>
+            <span className="dash-mode-action" title="Changer d'environnement">
+              <Icon name="switch" size={14} />
+            </span>
+          </button>
 
           {/* Navigation Links */}
           <nav className="dash-nav">
@@ -159,7 +169,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                 onClick={() => setShowDemoModal(true)}
                 title="Tester l'animation radar push USSD"
               >
-                ⚡ Démo USSD
+                ? Démo USSD
               </button>
 
               <button
@@ -288,7 +298,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                     onChange={(e) => setQuickLinkAmount(e.target.value)}
                   />
                   <small style={{ color: 'var(--muted)', fontSize: '11px' }}>
-                    Si aucun montant n’est renseigné, le client choisit la somme à payer.
+                    Si aucun montant n'est renseigné, le client choisit la somme à payer.
                   </small>
                 </div>
 

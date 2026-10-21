@@ -10,15 +10,72 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useDashboard } from './dashboard-context'
 
-const weeklyData = [
-  { day: 'Lun', amount: '1 250 000 F', height: '55%' },
-  { day: 'Mar', amount: '980 000 F', height: '42%' },
-  { day: 'Mer', amount: '1 540 000 F', height: '68%' },
-  { day: 'Jeu', amount: '1 120 000 F', height: '49%' },
-  { day: 'Ven', amount: '1 890 000 F', height: '82%' },
-  { day: 'Sam', amount: '2 350 000 F', height: '100%', isMax: true },
-  { day: 'Dim', amount: '1 420 000 F', height: '62%' },
-]
+// ─── Données par période ────────────────────────────────────────────────────
+
+type Period = 'jour' | 'semaine' | 'mois'
+
+const PERIOD_KPI: Record<Period, { volume: string; transactions: string; solde: string; panier: string; trendVolume: string; trendPanier: string }> = {
+  jour: {
+    volume: '312 500',
+    transactions: '48',
+    solde: '2 144 000',
+    panier: '6 510',
+    trendVolume: '+4,2% vs hier',
+    trendPanier: '+1,1% cette semaine',
+  },
+  semaine: {
+    volume: '2 180 000',
+    transactions: '327',
+    solde: '2 144 000',
+    panier: '6 668',
+    trendVolume: '+8,5% vs sem. dernière',
+    trendPanier: '+2,7% ce mois',
+  },
+  mois: {
+    volume: '8 472 500',
+    transactions: '1 284',
+    solde: '2 144 000',
+    panier: '6 598',
+    trendVolume: '+12,8% vs mois dernier',
+    trendPanier: '+3,4% ce trimestre',
+  },
+}
+
+const CHART_DATA: Record<Period, Array<{ label: string; amount: string; height: string; mtn: number; moov: number; celtiis: number }>> = {
+  jour: [
+    { label: '06h', amount: '28 000 F',   height: '18%', mtn: 60, moov: 28, celtiis: 12 },
+    { label: '08h', amount: '75 000 F',   height: '35%', mtn: 55, moov: 30, celtiis: 15 },
+    { label: '10h', amount: '112 000 F',  height: '58%', mtn: 65, moov: 22, celtiis: 13 },
+    { label: '12h', amount: '145 000 F',  height: '72%', mtn: 58, moov: 27, celtiis: 15 },
+    { label: '14h', amount: '98 000 F',   height: '48%', mtn: 62, moov: 25, celtiis: 13 },
+    { label: '16h', amount: '162 000 F',  height: '82%', mtn: 70, moov: 20, celtiis: 10 },
+    { label: '18h', amount: '188 000 F',  height: '100%', mtn: 64, moov: 23, celtiis: 13 },
+    { label: '20h', amount: '132 000 F',  height: '65%', mtn: 61, moov: 26, celtiis: 13 },
+  ],
+  semaine: [
+    { label: 'Lun', amount: '1 250 000 F', height: '55%', mtn: 60, moov: 28, celtiis: 12 },
+    { label: 'Mar', amount: '980 000 F',   height: '42%', mtn: 58, moov: 30, celtiis: 12 },
+    { label: 'Mer', amount: '1 540 000 F', height: '68%', mtn: 62, moov: 25, celtiis: 13 },
+    { label: 'Jeu', amount: '1 120 000 F', height: '49%', mtn: 64, moov: 22, celtiis: 14 },
+    { label: 'Ven', amount: '1 890 000 F', height: '82%', mtn: 65, moov: 23, celtiis: 12 },
+    { label: 'Sam', amount: '2 350 000 F', height: '100%', mtn: 63, moov: 24, celtiis: 13 },
+    { label: 'Dim', amount: '1 420 000 F', height: '62%', mtn: 60, moov: 27, celtiis: 13 },
+  ],
+  mois: [
+    { label: 'S1',  amount: '7 100 000 F', height: '72%',  mtn: 62, moov: 26, celtiis: 12 },
+    { label: 'S2',  amount: '6 850 000 F', height: '68%',  mtn: 60, moov: 28, celtiis: 12 },
+    { label: 'S3',  amount: '9 800 000 F', height: '100%', mtn: 65, moov: 23, celtiis: 12 },
+    { label: 'S4',  amount: '8 472 500 F', height: '86%',  mtn: 63, moov: 25, celtiis: 12 },
+  ],
+}
+
+const PERIOD_CHART_SUBTITLE: Record<Period, string> = {
+  jour: "Aujourd'hui par tranche horaire (F CFA)",
+  semaine: '7 derniers jours (F CFA)',
+  mois: '4 semaines du mois (F CFA)',
+}
+
+// ─── Composant principal ────────────────────────────────────────────────────
 
 export default function DashboardOverviewPage() {
   const { isLive } = useDashboard()
@@ -26,6 +83,10 @@ export default function DashboardOverviewPage() {
   const [activeBar, setActiveBar] = useState<string | null>('Sam')
   const [isLoading, setIsLoading] = useState(false)
   const [showPushModal, setShowPushModal] = useState(false)
+  const [period, setPeriod] = useState<Period>('semaine')
+
+  const kpi = PERIOD_KPI[period]
+  const chartData = CHART_DATA[period]
 
   const handleRefresh = () => {
     setIsLoading(true)
@@ -34,17 +95,59 @@ export default function DashboardOverviewPage() {
     }, 1100)
   }
 
+  // Quand on change de période, reset la barre active sur la dernière colonne
+  const handlePeriodChange = (p: Period) => {
+    setPeriod(p)
+    const data = CHART_DATA[p]
+    setActiveBar(data[data.length - 1].label)
+  }
+
+  const activeChartCol = chartData.find((d) => d.label === activeBar)
+
   return (
     <div>
       {/* Title & Mode Indicator */}
       <div className="dash-title-row">
         <div>
-          <h1>Vue d’ensemble</h1>
+          <h1>Vue d&apos;ensemble</h1>
           <p>
             {isLive ? 'Données réelles de production' : 'Environnement de simulation (Sandbox)'} — Activité de GoMarket Bénin
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Sélecteur de période */}
+          <div
+            style={{
+              display: 'flex',
+              background: '#f4f5f7',
+              borderRadius: '8px',
+              padding: '3px',
+              gap: '2px',
+            }}
+          >
+            {(['jour', 'semaine', 'mois'] as Period[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => handlePeriodChange(p)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: period === p ? 700 : 500,
+                  background: period === p ? '#fff' : 'transparent',
+                  color: period === p ? '#FD6D00' : 'var(--muted)',
+                  boxShadow: period === p ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
+                  transition: 'all 0.15s',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={handleRefresh}
             disabled={isLoading}
@@ -74,67 +177,179 @@ export default function DashboardOverviewPage() {
         </div>
       ) : (
         <div className="kpi-grid">
-        <div className="kpi-card" style={{ borderLeft: '4px solid var(--orange)' }}>
-          <small>Volume Encaissé (Mois)</small>
-          <strong>8 472 500 <em>F CFA</em></strong>
-          <span className="kpi-trend trend-up">
-            <Icon name="trend" size={14} /> +12,8% vs mois dernier
-          </span>
-        </div>
+          {/* Volume Encaissé — bordure orange */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #FD6D00' }}>
+            <small>Volume Encaissé ({period === 'jour' ? 'Jour' : period === 'semaine' ? 'Semaine' : 'Mois'})</small>
+            <strong>{kpi.volume} <em>F CFA</em></strong>
+            <span className="kpi-trend trend-up">
+              <Icon name="trend" size={14} /> {kpi.trendVolume}
+            </span>
+          </div>
 
-        <div className="kpi-card">
-          <small>Transactions Réussies</small>
-          <strong>1 284</strong>
-          <span className="kpi-trend trend-up">
-            <Icon name="check" size={14} /> 98,2% de taux de succès
-          </span>
-        </div>
+          {/* Transactions Réussies — bordure verte */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid var(--green)' }}>
+            <small>Transactions Réussies</small>
+            <strong>{kpi.transactions}</strong>
+            <span className="kpi-trend trend-up">
+              <Icon name="check" size={14} /> 98,2% de taux de succès
+            </span>
+          </div>
 
-        <div className="kpi-card">
-          <small>Solde Prêt au Virement</small>
-          <strong>2 144 000 <em>F CFA</em></strong>
-          <span className="kpi-trend trend-neutral">
-            Prochain reversement : Demain 09h
-          </span>
-        </div>
+          {/* Solde Prêt au Virement — bordure bleue nuit + bouton reversement */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #0E3864' }}>
+            <small>Solde Prêt au Virement</small>
+            <strong>{kpi.solde} <em>F CFA</em></strong>
+            <span className="kpi-trend trend-neutral">
+              Prochain reversement : Demain 09h
+            </span>
+            <Link
+              href="/dashboard/reversements"
+              className="button button-primary"
+              style={{
+                marginTop: '10px',
+                display: 'inline-block',
+                fontSize: '11px',
+                minHeight: '28px',
+                padding: '4px 12px',
+                background: '#0E3864',
+                borderColor: '#0E3864',
+                lineHeight: '20px',
+              }}
+            >
+              Reverser maintenant →
+            </Link>
+          </div>
 
-        <div className="kpi-card">
-          <small>Panier Moyen Client</small>
-          <strong>6 598 <em>F CFA</em></strong>
-          <span className="kpi-trend trend-up">
-            <Icon name="trend" size={14} /> +3,4% ce trimestre
-          </span>
+          {/* Panier Moyen — bordure grise */}
+          <div className="kpi-card" style={{ borderLeft: '4px solid #9ca3af' }}>
+            <small>Panier Moyen Client</small>
+            <strong>{kpi.panier} <em>F CFA</em></strong>
+            <span className="kpi-trend trend-up">
+              <Icon name="trend" size={14} /> {kpi.trendPanier}
+            </span>
+          </div>
         </div>
-      </div>
       )}
+
+      {/* ── Widget Solde Disponible (fond bleu nuit, avant le graphique) ──── */}
+      <div
+        style={{
+          background: '#0E3864',
+          borderRadius: '14px',
+          padding: '22px 28px',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '24px',
+        }}
+      >
+        <div>
+          <p style={{ margin: 0, fontSize: '12px', fontWeight: 500, opacity: 0.7, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Solde disponible
+          </p>
+          <div style={{ fontSize: '32px', fontWeight: 800, margin: '4px 0 6px', letterSpacing: '-0.02em' }}>
+            2 144 000{' '}
+            <em style={{ fontSize: '16px', fontStyle: 'normal', fontWeight: 500, opacity: 0.75 }}>F CFA</em>
+          </div>
+          <p style={{ margin: 0, fontSize: '13px', opacity: 0.65 }}>
+            🕘 Prochain reversement automatique :{' '}
+            <strong style={{ color: '#FD6D00' }}>Demain 09h</strong>
+          </p>
+        </div>
+        <Link
+          href="/dashboard/reversements"
+          style={{
+            background: '#FD6D00',
+            color: '#fff',
+            borderRadius: '8px',
+            padding: '10px 22px',
+            fontWeight: 700,
+            fontSize: '13px',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: '0 2px 8px rgba(253,109,0,0.35)',
+          }}
+        >
+          ⚡ Reverser maintenant
+        </Link>
+      </div>
 
       {/* Charts & Channels Section */}
       <div className="dash-grid-2-1">
-        {/* Weekly Chart */}
+        {/* Bar Chart */}
         <div className="dash-panel">
           <div className="dash-panel-header">
             <div>
-              <h3>Volume d’encaissement journalier</h3>
-              <small style={{ color: 'var(--muted)', fontSize: '11px' }}>7 derniers jours (F CFA)</small>
+              <h3>Volume d&apos;encaissement</h3>
+              <small style={{ color: 'var(--muted)', fontSize: '11px' }}>{PERIOD_CHART_SUBTITLE[period]}</small>
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--orange)' }}>
-              {activeBar ? `${weeklyData.find(d => d.day === activeBar)?.amount} (${activeBar})` : 'Survolez une barre'}
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#FD6D00' }}>
+              {activeChartCol
+                ? `${activeChartCol.amount} (${activeBar})`
+                : 'Survolez une barre'}
             </span>
           </div>
 
           <div className="chart-bars-wrap">
-            {weeklyData.map((col) => (
+            {chartData.map((col) => (
               <div
-                key={col.day}
+                key={col.label}
                 className="chart-col"
-                onMouseEnter={() => setActiveBar(col.day)}
+                onMouseEnter={() => setActiveBar(col.label)}
               >
                 <div
-                  className={`chart-bar ${col.day === activeBar ? 'current' : ''}`}
-                  style={{ height: col.height }}
-                  title={`${col.day}: ${col.amount}`}
+                  className={`chart-bar ${col.label === activeBar ? 'current' : ''}`}
+                  style={{
+                    height: col.height,
+                    background: col.label === activeBar ? '#FD6D00' : undefined,
+                    transition: 'background 0.2s',
+                  }}
+                  title={`${col.label}: ${col.amount}`}
                 />
-                <span className="chart-label">{col.day}</span>
+                {/* Tooltip décomposition MTN / Moov / Celtiis sur la barre active */}
+                {col.label === activeBar && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '22px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                      padding: '6px 8px',
+                      whiteSpace: 'nowrap',
+                      zIndex: 10,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '3px',
+                      fontSize: '10px',
+                      lineHeight: '1.3',
+                      minWidth: '80px',
+                    }}
+                  >
+                    <span style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                      <span style={{ color: '#c9a800', fontWeight: 700 }}>MTN</span>
+                      <span style={{ fontWeight: 600 }}>{col.mtn}%</span>
+                    </span>
+                    <span style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                      <span style={{ color: '#005baa', fontWeight: 700 }}>Moov</span>
+                      <span style={{ fontWeight: 600 }}>{col.moov}%</span>
+                    </span>
+                    <span style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                      <span style={{ color: '#0e2b5c', fontWeight: 700 }}>Celtiis</span>
+                      <span style={{ fontWeight: 600 }}>{col.celtiis}%</span>
+                    </span>
+                  </div>
+                )}
+                <span className="chart-label">{col.label}</span>
               </div>
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { Button } from '@/components/Button'
-import { FintechLiveBackground } from '@/components/FintechLiveBackground'
+import { HeroWeatherBackground } from '@/components/HeroWeatherBackground'
 import { Icon } from '@/components/Icon'
 import type { Metadata } from 'next'
 
@@ -13,7 +13,7 @@ export default function SecuritePage() {
   return (
     <main>
       <section className="subpage-hero">
-        <FintechLiveBackground />
+        <HeroWeatherBackground />
         <div className="container subpage-hero-inner">
           <h1>Une infrastructure conçue selon les plus hauts standards</h1>
           <p>

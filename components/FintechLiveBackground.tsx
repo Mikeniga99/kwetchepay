@@ -89,7 +89,7 @@ interface Firefly {
   vy: number
 }
 
-export function FintechLiveBackground() {
+export function FintechLiveBackground({ showMoneyRain = true }: { showMoneyRain?: boolean } = {}) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
@@ -140,7 +140,7 @@ export function FintechLiveBackground() {
 
     const initEntities = () => {
       // 1. Initial Rain of Banknotes (pre-populated across the sky)
-      const banknoteCount = width < 768 ? 16 : 30
+      const banknoteCount = showMoneyRain ? (width < 768 ? 16 : 30) : 0
       banknotes = []
 
       const banknoteTypes = [
@@ -188,7 +188,7 @@ export function FintechLiveBackground() {
       }
 
       // 2. Initial Rain of Gold Coins (500 F CFA)
-      const coinCount = width < 768 ? 22 : 45
+      const coinCount = showMoneyRain ? (width < 768 ? 22 : 45) : 0
       coins = []
       for (let i = 0; i < coinCount; i++) {
         coins.push({
@@ -309,7 +309,7 @@ export function FintechLiveBackground() {
       // ========================================================
       // 2. THE RAIN OF BANKNOTES (BILLET FALLING FLUTTER)
       // ========================================================
-      for (let i = 0; i < banknotes.length; i++) {
+      for (let i = 0; showMoneyRain && i < banknotes.length; i++) {
         const b = banknotes[i]
 
         b.y += b.vy
@@ -372,7 +372,7 @@ export function FintechLiveBackground() {
       // ========================================================
       // 3. THE RAIN OF GOLD COINS (500 F CFA)
       // ========================================================
-      for (let i = 0; i < coins.length; i++) {
+      for (let i = 0; showMoneyRain && i < coins.length; i++) {
         const c = coins[i]
 
         c.y += c.vy
@@ -654,7 +654,7 @@ export function FintechLiveBackground() {
       // ========================================================
       // 8. LEAPING GOLDEN FISH -> METAMORPHOSIS
       // ========================================================
-      if (time - lastFishSpawn > 3400) {
+      if (showMoneyRain && time - lastFishSpawn > 3400) {
         spawnFish()
         lastFishSpawn = time
       }
@@ -778,7 +778,7 @@ export function FintechLiveBackground() {
       document.removeEventListener('visibilitychange', handleVisibility)
       cancelAnimationFrame(animId)
     }
-  }, [])
+  }, [showMoneyRain])
 
   return (
     <div

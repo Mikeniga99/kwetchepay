@@ -13,7 +13,7 @@ export function DashboardPreview() {
     <div className="dashboard-wrap reveal delay-2">
       <div className="dashboard">
         <aside className="dash-sidebar">
-          <Logo />
+          <Logo light />
           <div className="dash-menu">
             <span className="dash-menu-active"><Icon name="bars" size={17} /> Vue d’ensemble</span>
             <span><Icon name="card" size={17} /> Transactions</span>

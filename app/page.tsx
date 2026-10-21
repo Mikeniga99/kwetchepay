@@ -1,7 +1,7 @@
 import { Button } from '@/components/Button'
 import { CodeWindow } from '@/components/CodeWindow'
 import { DashboardPreview } from '@/components/DashboardPreview'
-import { FintechLiveBackground } from '@/components/FintechLiveBackground'
+import { HeroWeatherBackground } from '@/components/HeroWeatherBackground'
 import { Icon, type IconName } from '@/components/Icon'
 import { Logo } from '@/components/Logo'
 import { OperatorLogo } from '@/components/OperatorLogo'
@@ -24,7 +24,7 @@ export default function Home() {
   return (
     <main>
       <section className="hero" id="accueil">
-          <FintechLiveBackground />
+          <HeroWeatherBackground />
           <div className="container hero-content">
             <div className="hero-copy">
               <h1 className="reveal">Tous vos paiements.<br /><em>Une seule plateforme.</em></h1>

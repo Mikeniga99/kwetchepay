@@ -3,8 +3,11 @@
 import { Icon } from '@/components/Icon'
 import { INITIAL_WEBHOOK_LOGS, type WebhookLog } from '@/lib/dashboard-data'
 import { useState } from 'react'
+import { useDashboard } from '../dashboard-context'
 
 export default function DashboardDevelopersPage() {
+  const { isLive } = useDashboard()
+
   // Key reveal states
   const [showSecretKey, setShowSecretKey] = useState(false)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
@@ -16,8 +19,18 @@ export default function DashboardDevelopersPage() {
   const [logs, setLogs] = useState<WebhookLog[]>(INITIAL_WEBHOOK_LOGS)
   const [selectedLog, setSelectedLog] = useState<WebhookLog | null>(null)
 
-  const testPubKey = 'kp_test_pk_80492_e7f39b21a8d0'
-  const testSecKey = 'kp_test_sk_91823_c4b91a7e28f09d21'
+  const keys = {
+    test: {
+      pub: 'kp_test_pk_80492_e7f39b21a8d0',
+      sec: 'kp_test_sk_91823_c4b91a7e28f09d21'
+    },
+    live: {
+      pub: 'kp_live_pk_11029_a5d82f33c1a9',
+      sec: 'kp_live_sk_44921_b8e20f1a92c0d832'
+    }
+  }
+
+  const currentKeys = isLive ? keys.live : keys.test
 
   const copyToClipboard = (text: string, keyName: string) => {
     navigator.clipboard?.writeText(text)
@@ -43,7 +56,7 @@ export default function DashboardDevelopersPage() {
         payload: JSON.stringify(
           {
             event: 'payment.success',
-            test_mode: true,
+            test_mode: !isLive,
             data: {
               id: `pay_${Math.random().toString(36).substring(2, 9)}`,
               amount: 15000,
@@ -75,13 +88,26 @@ export default function DashboardDevelopersPage() {
       <div className="dash-panel" style={{ marginBottom: '24px' }}>
         <div className="dash-panel-header">
           <div>
-            <h3>Clés d’API (Environnement Sandbox / Test)</h3>
+            <h3>Clés d’API (Environnement {isLive ? 'Production' : 'Test'})</h3>
             <small style={{ color: 'var(--muted)', fontSize: '11px' }}>
-              Utilisez ces clés pour tester vos intégrations avec des numéros de téléphone de simulation.
+              {isLive
+                ? 'Utilisez ces clés pour encaisser des paiements réels.'
+                : 'Utilisez ces clés pour tester vos intégrations avec des numéros de simulation.'}
             </small>
           </div>
-          <span className="dash-mode-badge" style={{ background: '#fff8e6', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', color: '#925700', fontWeight: 700 }}>
-            <i style={{ background: '#e59000' }} /> Bac à sable
+          <span
+            className="dash-mode-badge"
+            style={{
+              background: isLive ? '#e6fffa' : '#fff8e6',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              color: isLive ? '#0694a2' : '#925700',
+              fontWeight: 700
+            }}
+          >
+            <i style={{ background: isLive ? '#0694a2' : '#e59000' }} />
+            {isLive ? 'Production' : 'Simulation'}
           </span>
         </div>
 
@@ -95,13 +121,13 @@ export default function DashboardDevelopersPage() {
               <input
                 className="form-control"
                 readOnly
-                value={testPubKey}
+                value={currentKeys.pub}
                 style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '12px', background: '#fafbfa' }}
               />
               <button
                 className="button button-secondary"
                 style={{ minHeight: '44px', fontSize: '12px', whiteSpace: 'nowrap' }}
-                onClick={() => copyToClipboard(testPubKey, 'pub')}
+                onClick={() => copyToClipboard(currentKeys.pub, 'pub')}
               >
                 {copiedKey === 'pub' ? '✓ Copié' : 'Copier'}
               </button>
@@ -118,7 +144,7 @@ export default function DashboardDevelopersPage() {
                 className="form-control"
                 readOnly
                 type={showSecretKey ? 'text' : 'password'}
-                value={testSecKey}
+                value={currentKeys.sec}
                 style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '12px', background: '#fafbfa' }}
               />
               <button
@@ -131,7 +157,7 @@ export default function DashboardDevelopersPage() {
               <button
                 className="button button-secondary"
                 style={{ minHeight: '44px', fontSize: '12px', whiteSpace: 'nowrap' }}
-                onClick={() => copyToClipboard(testSecKey, 'sec')}
+                onClick={() => copyToClipboard(currentKeys.sec, 'sec')}
               >
                 {copiedKey === 'sec' ? '✓ Copié' : 'Copier'}
               </button>

@@ -14,6 +14,7 @@ export type IconName =
   | 'menu'
   | 'phone'
   | 'shield'
+  | 'switch'
   | 'trend'
   | 'users'
   | 'webhook'
@@ -34,6 +35,7 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     menu: <><path d="M4 7h16M4 12h16M4 17h16" /></>,
     phone: <><rect x="7" y="2" width="10" height="20" rx="2" /><path d="M10 6h4M11 18h2" /></>,
     shield: <><path d="M12 3 5 6v5c0 4.7 2.8 8.4 7 10 4.2-1.6 7-5.3 7-10V6l-7-3Z" /><path d="m9 12 2 2 4-4" /></>,
+    switch: <><path d="m16 3 4 4-4 4" /><path d="M20 7H4" /><path d="m8 21-4-4 4-4" /><path d="M4 17h16" /></>,
     trend: <><path d="M4 17 10 11l4 4 6-8" /><path d="M15 7h5v5" /></>,
     users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
     webhook: <><path d="M18 16.5a4 4 0 1 1-1.7-6.55" /><path d="m13 13 3.3-3.05L15.5 5" /><path d="M6 7.5a4 4 0 1 1 1.7 6.55" /><path d="m11 11-3.3 3.05L8.5 19" /></>,

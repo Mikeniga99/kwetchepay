@@ -1,6 +1,6 @@
 import { Button } from '@/components/Button'
 import { DashboardPreview } from '@/components/DashboardPreview'
-import { FintechLiveBackground } from '@/components/FintechLiveBackground'
+import { HeroWeatherBackground } from '@/components/HeroWeatherBackground'
 import { Icon } from '@/components/Icon'
 import { KineticLiveTicker } from '@/components/KineticLiveTicker'
 import type { Metadata } from 'next'
@@ -15,7 +15,7 @@ export default function MarchandsPage() {
   return (
     <main>
       <section className="subpage-hero">
-        <FintechLiveBackground />
+        <HeroWeatherBackground />
         <div className="container subpage-hero-inner">
           <h1>Pilotez votre chiffre d’affaires en temps réel</h1>
           <p>
