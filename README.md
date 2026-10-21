@@ -75,6 +75,11 @@ npm start
 - **Épuration UI** : Simplification du portail d'authentification pour une conversion maximale.
 - **Layout Persistant** : Barre latérale fixée au défilement pour un accès permanent aux outils.
 
+### Finalisation & Conformité Régionale (Dernière étape)
+- **Validation USSD Stricte** : Mise en conformité des numéros béninois (préfixe `01` obligatoire).
+- **Documentation Technique** : Intégration des snippets de vérification de signature HMAC pour les webhooks.
+- **Accessibilité Mobile** : Optimisation des tables à colonnes multiples pour les écrans ultra-compacts.
+
 ### Étape 5 — Branding & Expérience Client
 - **Studio de Personnalisation** : Interface de branding avec couleur dynamique et **Live Receipt Preview** sur châssis mobile simulé.
 - **Console Développeur** : Gestion des clés API (Test/Live) et simulateur de Webhooks avec inspecteur JSON thémé.

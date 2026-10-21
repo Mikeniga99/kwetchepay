@@ -46,7 +46,10 @@ export function MobileMoneyPushModal({
   if (!isOpen) return null
 
   const handleStartPush = (e: React.FormEvent) => {
-    e.preventDefault()
+    if (phone.length !== 10 || !phone.startsWith('01')) {
+      alert('Veuillez saisir un numéro béninois valide à 10 chiffres commençant par 01.')
+      return
+    }
     setState('initiating')
     setTimeout(() => {
       setCountdown(45)

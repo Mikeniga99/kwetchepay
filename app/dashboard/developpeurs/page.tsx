@@ -221,6 +221,19 @@ export default function DashboardDevelopersPage() {
             {copiedKey === 'whsec' ? '✓ Copié' : 'Copier'}
           </button>
         </div>
+
+        <div style={{ marginTop: '20px', borderTop: '1px dashed var(--line)', paddingTop: '16px' }}>
+          <h4 style={{ fontSize: '13px', marginBottom: '10px' }}>🔐 Vérification des signatures (Node.js)</h4>
+          <pre style={{ background: '#f1f3f2', padding: '12px', borderRadius: '6px', fontSize: '11px', overflowX: 'auto' }}>
+            <code>{`const crypto = require('crypto');
+const signature = req.headers['x-kp-signature'];
+const hmac = crypto.createHmac('sha256', 'whsec_...')
+                  .update(JSON.stringify(req.body))
+                  .digest('hex');
+
+if (signature === hmac) { /* Valide */ }`}</code>
+          </pre>
+        </div>
       </div>
 
       {/* Webhook Events Logs */}

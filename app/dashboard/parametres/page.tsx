@@ -63,80 +63,6 @@ export default function DashboardSettingsPage() {
           <p>Gérez les informations de votre entreprise, vos accès collaborateurs et la sécurité.</p>
         </div>
 
-        {/* Column 2: Live Preview */}
-        <aside style={{ position: 'sticky', top: '24px' }}>
-          <div style={{ marginBottom: '12px', fontWeight: 700, fontSize: '12px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Aperçu en temps réel
-          </div>
-
-          <div className="receipt-preview-mobile" style={{
-            background: '#fff',
-            borderRadius: '30px',
-            border: '8px solid #1a202c',
-            height: '580px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative'
-          }}>
-            {/* Notch */}
-            <div style={{ width: '120px', height: '20px', background: '#1a202c', margin: '0 auto', borderRadius: '0 0 15px 15px' }} />
-
-            <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-              {showLogo && (
-                <div style={{ marginBottom: '24px', transform: 'scale(0.8)' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: brandColor, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 900, fontSize: '20px' }}>
-                    GM
-                  </div>
-                </div>
-              )}
-
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#dcfce7', color: '#15803d', display: 'grid', placeItems: 'center', marginBottom: '12px' }}>
-                <Icon name="check" size={20} />
-              </div>
-
-              <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Paiement Réussi</h4>
-              <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>Merci pour votre confiance !</p>
-
-              <div style={{ margin: '24px 0', fontSize: '32px', fontWeight: 900, fontFamily: 'var(--font-dm-mono)' }}>
-                15 000 <span style={{ fontSize: '14px', fontWeight: 500 }}>F CFA</span>
-              </div>
-
-              <div style={{ width: '100%', borderTop: '1px dashed var(--line)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--muted)' }}>Marchand</span>
-                  <span style={{ fontWeight: 600 }}>GoMarket Bénin</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--muted)' }}>Référence</span>
-                  <span style={{ fontWeight: 600, fontFamily: 'var(--font-dm-mono)' }}>#KP-20261019-001</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--muted)' }}>Méthode</span>
-                  <span style={{ fontWeight: 600 }}>MTN MoMo (+229 01...)</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--muted)' }}>Date</span>
-                  <span style={{ fontWeight: 600 }}>19 Oct 2026, 18:42</span>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 'auto', width: '100%' }}>
-                <button
-                  className="button"
-                  disabled
-                  style={{ width: '100%', background: brandColor, color: '#fff', border: 'none', borderRadius: '10px', minHeight: '44px', fontWeight: 700, opacity: 0.9 }}
-                >
-                  Télécharger le reçu
-                </button>
-                <p style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '16px' }}>
-                  Sécurisé par <b>KwêTché Pay</b>
-                </p>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
@@ -318,6 +244,8 @@ export default function DashboardSettingsPage() {
               />
             </div>
           </div>
+        </div>
+
         </div>
 
         {/* Column 2: Live Preview */}
