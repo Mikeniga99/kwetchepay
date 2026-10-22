@@ -164,13 +164,67 @@ const AVATAR_COLORS = [
 
 export default function ClientsPage() {
   const [search, setSearch] = useState('')
+  const [clients, setClients] = useState(CLIENTS)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [showNewContact, setShowNewContact] = useState(false)
+  const [contactName, setContactName] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [feedback, setFeedback] = useState('')
 
-  const filtered = CLIENTS.filter((c) =>
+  const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.phone.includes(search) ||
     c.email.toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleExport = () => {
+    const columns = ['Nom', 'Téléphone', 'Email', 'Opérateur', 'Transactions', 'Total payé', 'Dernier paiement']
+    const rows = filtered.map((client) => [
+      client.name,
+      client.phone,
+      client.email,
+      client.operator,
+      String(client.transactions),
+      String(client.totalPaid),
+      client.lastPayment,
+    ])
+    const csv = [columns, ...rows]
+      .map((row) => row.map((value) => `"${value.replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n')
+    const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'kwetchepay-clients.csv'
+    anchor.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    setFeedback(`${filtered.length} contact${filtered.length > 1 ? 's' : ''} exporté${filtered.length > 1 ? 's' : ''}.`)
+  }
+
+  const handleCreateContact = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const name = contactName.trim()
+    if (!name) return
+    const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('')
+    const newContact: Client = {
+      id: `local-${Date.now()}`,
+      initials,
+      name,
+      phone: contactPhone.trim(),
+      email: contactEmail.trim(),
+      transactions: 0,
+      totalPaid: 0,
+      operator: 'MTN MoMo',
+      lastPayment: 'Aucun paiement',
+      history: [],
+    }
+    setClients((current) => [newContact, ...current])
+    setShowNewContact(false)
+    setContactName('')
+    setContactPhone('')
+    setContactEmail('')
+    setFeedback('Contact ajouté à cette démonstration. Les données ne sont pas synchronisées.')
+  }
 
   const handlePaymentRequest = (client: Client, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -195,14 +249,16 @@ export default function ClientsPage() {
           <p>Gérez vos clients fidèles et envoyez des demandes de paiement en un clic.</p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-           <button className="button button-secondary" style={{ minHeight: '38px', fontSize: '13px' }}>
+           <button type="button" className="button button-secondary" style={{ minHeight: '38px', fontSize: '13px' }} onClick={handleExport}>
             <Icon name="trend" size={14} /> Exporter (.csv)
           </button>
-          <button className="button button-primary" style={{ minHeight: '38px', fontSize: '13px' }}>
+          <button type="button" className="button button-primary" style={{ minHeight: '38px', fontSize: '13px' }} onClick={() => setShowNewContact(true)}>
             + Nouveau contact
           </button>
         </div>
       </div>
+
+      {feedback && <p role="status" style={{ margin: '-8px 0 14px', color: 'var(--green)', fontSize: '12px' }}>{feedback}</p>}
 
       {/* Search */}
       <div className="dash-panel" style={{ padding: '16px 20px', marginBottom: '20px' }}>
@@ -238,7 +294,8 @@ export default function ClientsPage() {
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)' }}>
-                    Aucun client ne correspond à votre recherche.
+                    <p style={{ margin: '0 0 10px' }}>Aucun client ne correspond à votre recherche.</p>
+                    {search && <button type="button" className="button button-secondary" onClick={() => setSearch('')}>Effacer la recherche</button>}
                   </td>
                 </tr>
               ) : (
@@ -355,7 +412,7 @@ export default function ClientsPage() {
                     width: '50px',
                     height: '50px',
                     borderRadius: '50%',
-                    background: AVATAR_COLORS[CLIENTS.indexOf(selectedClient) % 2].bg,
+                    background: AVATAR_COLORS[Math.max(0, clients.findIndex((client) => client.id === selectedClient.id)) % 2].bg,
                     color: '#fff',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -400,7 +457,11 @@ export default function ClientsPage() {
                 3 dernières transactions
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {selectedClient.history.map((tx) => (
+                {selectedClient.history.length === 0 ? (
+                  <p style={{ margin: 0, padding: '14px', color: 'var(--muted)', background: '#f8faf9', borderRadius: '8px', fontSize: '12px' }}>
+                    Aucune transaction pour ce contact.
+                  </p>
+                ) : selectedClient.history.map((tx) => (
                   <div
                     key={tx.ref}
                     style={{
@@ -453,6 +514,36 @@ export default function ClientsPage() {
                 Fermer
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showNewContact && (
+        <div className="dash-modal-backdrop" onClick={() => setShowNewContact(false)}>
+          <div className="dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="new-contact-title" onClick={(event) => event.stopPropagation()} style={{ maxWidth: '460px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h2 id="new-contact-title" style={{ margin: 0, fontSize: '18px' }}>Nouveau contact</h2>
+              <button type="button" aria-label="Fermer" onClick={() => setShowNewContact(false)} style={{ background: 'none', border: 0, cursor: 'pointer', color: 'var(--muted)' }}><Icon name="x" size={20} /></button>
+            </div>
+            <p style={{ margin: '0 0 16px', color: 'var(--muted)', fontSize: '12px' }}>Ajout local à cette démonstration ; le contact ne sera pas conservé après actualisation.</p>
+            <form onSubmit={handleCreateContact}>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label htmlFor="client-name">Nom complet *</label>
+                <input id="client-name" className="form-control" value={contactName} onChange={(event) => setContactName(event.target.value)} required autoFocus />
+              </div>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label htmlFor="client-phone">Téléphone</label>
+                <input id="client-phone" className="form-control" type="tel" value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '18px' }}>
+                <label htmlFor="client-email">Adresse e-mail</label>
+                <input id="client-email" className="form-control" type="email" value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button type="button" className="button button-secondary" onClick={() => setShowNewContact(false)}>Annuler</button>
+                <button type="submit" className="button button-primary">Ajouter le contact</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

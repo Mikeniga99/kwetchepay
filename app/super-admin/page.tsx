@@ -6,15 +6,19 @@ import { Icon, type IconName } from '@/components/Icon'
 import { Logo } from '@/components/Logo'
 import { OperatorLogo } from '@/components/OperatorLogo'
 
-type Section = 'overview' | 'merchants' | 'transactions' | 'operators' | 'users' | 'audit'
+type Section = 'overview' | 'merchants' | 'transactions' | 'operators' | 'payouts' | 'risk' | 'reports' | 'users' | 'audit' | 'settings'
 
 const navigation: { id: Section; label: string; icon: IconName }[] = [
   { id: 'overview', label: "Vue d'ensemble", icon: 'bars' },
   { id: 'merchants', label: 'Marchands', icon: 'users' },
   { id: 'transactions', label: 'Transactions', icon: 'card' },
   { id: 'operators', label: 'Opérateurs', icon: 'globe' },
+  { id: 'payouts', label: 'Reversements', icon: 'trend' },
+  { id: 'risk', label: 'Conformité & risques', icon: 'shield' },
+  { id: 'reports', label: 'Rapports & exports', icon: 'bars' },
   { id: 'users', label: 'Utilisateurs', icon: 'lock' },
   { id: 'audit', label: "Journal d'audit", icon: 'shield' },
+  { id: 'settings', label: 'Paramètres plateforme', icon: 'switch' },
 ]
 
 const merchants = [
@@ -54,8 +58,28 @@ const operators = [
   { name: 'Celtiis Cash', key: 'celtiis' as const, uptime: '99,74 %', success: '96,4 %', latency: '2,4 s', status: 'À surveiller' },
 ]
 
+const payouts = [
+  { batch: 'RV-2026-10842', merchant: 'GoMarket Bénin', amount: '1 284 000 F', method: 'MTN MoMo', date: 'Aujourd’hui · 10:15', status: 'En cours' },
+  { batch: 'RV-2026-10839', merchant: 'Bénin Express', amount: '842 500 F', method: 'Virement bancaire', date: 'Aujourd’hui · 09:40', status: 'Terminé' },
+  { batch: 'RV-2026-10831', merchant: 'Chez Afi', amount: '325 000 F', method: 'Moov Money', date: 'Hier · 16:20', status: 'À traiter' },
+  { batch: 'RV-2026-10824', merchant: 'Maison Kora', amount: '216 800 F', method: 'Virement bancaire', date: 'Hier · 14:05', status: 'Échoué' },
+]
+
+const riskCases = [
+  { merchant: 'Chez Afi', id: 'kw_mch_80487', reason: 'Documents KYC à compléter', level: 'Modéré', opened: 'Aujourd’hui · 09:12', status: 'À examiner' },
+  { merchant: 'Pharmacie du Port', id: 'kw_mch_80394', reason: 'Variation inhabituelle du volume', level: 'Élevé', opened: 'Hier · 18:34', status: 'En revue' },
+  { merchant: 'Bénin Express', id: 'kw_mch_80461', reason: 'Vérification périodique du compte', level: 'Faible', opened: '20 oct. · 11:08', status: 'En revue' },
+]
+
+const reports = [
+  { name: 'Synthèse des transactions', period: '21 oct. 2026', format: 'CSV', scope: 'Plateforme', status: 'Prêt' },
+  { name: 'Performance des opérateurs', period: '14–21 oct. 2026', format: 'CSV', scope: 'Opérateurs', status: 'Prêt' },
+  { name: 'Activité marchande', period: 'Septembre 2026', format: 'CSV', scope: 'Marchands', status: 'Prêt' },
+  { name: 'Journal des reversements', period: 'Septembre 2026', format: 'CSV', scope: 'Finance', status: 'Prêt' },
+]
+
 function StatusPill({ children }: { children: string }) {
-  const style = children === 'Réussie' || children === 'Actif' || children === 'Opérationnel'
+  const style = children === 'Réussie' || children === 'Actif' || children === 'Opérationnel' || children === 'Terminé' || children === 'Prêt'
     ? 'success'
     : children === 'Échouée' || children === 'Suspendu'
       ? 'danger'
@@ -85,6 +109,9 @@ export default function SuperAdminPage() {
   const transactionRows = useMemo(() => transactions.filter((transaction) => matches(Object.values(transaction))), [normalizedQuery])
   const adminRows = useMemo(() => admins.filter((admin) => matches(Object.values(admin))), [normalizedQuery])
   const auditRows = useMemo(() => auditEvents.filter((event) => matches(Object.values(event))), [normalizedQuery])
+  const payoutRows = useMemo(() => payouts.filter((payout) => matches(Object.values(payout))), [normalizedQuery])
+  const riskRows = useMemo(() => riskCases.filter((riskCase) => matches(Object.values(riskCase))), [normalizedQuery])
+  const reportRows = useMemo(() => reports.filter((report) => matches(Object.values(report))), [normalizedQuery])
 
   const title = section === 'overview' ? "Vue d'ensemble" : activeLabel
 
@@ -93,14 +120,19 @@ export default function SuperAdminPage() {
       <aside className="sa-sidebar">
         <div className="sa-brand"><Logo light size="sm" /><span className="sa-brand-tag">ADMIN</span></div>
         <div className="sa-workspace"><span className="sa-workspace-icon">K</span><span><b>KwêTché Pay</b><small>Console plateforme</small></span><Icon name="chevron" size={15} /></div>
-        <p className="sa-nav-label">SUPERVISION</p>
         <nav className="sa-nav" aria-label="Navigation Super Admin">
-          {navigation.map((item) => (
-            <button key={item.id} title={item.label} aria-pressed={section === item.id} className={`sa-nav-item ${section === item.id ? 'active' : ''}`} onClick={() => { setSection(item.id); setQuery('') }}>
+          {[
+            { label: 'SUPERVISION', items: navigation.slice(0, 4) },
+            { label: 'FINANCES & CONTRÔLE', items: navigation.slice(4, 7) },
+            { label: 'ADMINISTRATION', items: navigation.slice(7) },
+          ].map((group) => <div className="sa-nav-group" key={group.label}>
+            <p className="sa-nav-label">{group.label}</p>
+            {group.items.map((item) => <button key={item.id} title={item.label} aria-pressed={section === item.id} className={`sa-nav-item ${section === item.id ? 'active' : ''}`} onClick={() => { setSection(item.id); setQuery('') }}>
               <Icon name={item.icon} size={17} /><span>{item.label}</span>
               {item.id === 'merchants' && <i className="sa-nav-count">3</i>}
-            </button>
-          ))}
+              {item.id === 'risk' && <i className="sa-nav-count">2</i>}
+            </button>)}
+          </div>)}
         </nav>
         <div className="sa-sidebar-bottom">
           <div className="sa-security-note"><Icon name="lock" size={16} /><span><b>Mode lecture seule</b><small>Console de démonstration</small></span></div>
@@ -117,7 +149,7 @@ export default function SuperAdminPage() {
         <div className="sa-content">
           <div className="sa-title-row">
             <div><p className="sa-eyebrow">KWÊTCHÉ PAY · SUPERVISION</p><h1>{title}</h1><p className="sa-subtitle">Surveillez l’activité et l’état général de la plateforme.</p></div>
-            {section !== 'overview' && <label className="sa-search"><Icon name="bars" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Rechercher ${title.toLocaleLowerCase('fr')}…`} /></label>}
+            {section !== 'overview' && section !== 'settings' && <label className="sa-search"><Icon name="bars" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Rechercher ${title.toLocaleLowerCase('fr')}…`} /></label>}
           </div>
 
           {section === 'overview' && <>
@@ -158,6 +190,29 @@ export default function SuperAdminPage() {
           {section === 'users' && <div className="sa-panel sa-table-panel"><div className="sa-panel-heading"><div><h2>Accès administrateurs</h2><p>Rôles et dernière activité · données de démonstration</p></div><span className="sa-summary-chip">4 comptes</span></div><Table headers={['ADMINISTRATEUR', 'RÔLE', 'DERNIÈRE ACTIVITÉ', 'ÉTAT']} rows={adminRows.map((admin) => [<span className="sa-person" key="person"><i>{admin.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</i><span><b>{admin.name}</b><small>{admin.email}</small></span></span>, admin.role, admin.last, <StatusPill key="status">{admin.status}</StatusPill>])} /><div className="sa-readonly-note"><Icon name="lock" size={15} /> Les rôles et autorisations sont présentés à titre indicatif. La gestion réelle des accès nécessite un service d’authentification.</div></div>}
 
           {section === 'audit' && <div className="sa-panel sa-table-panel"><div className="sa-panel-heading"><div><h2>Activité administrative</h2><p>Actions récentes consignées dans le journal · données de démonstration</p></div><span className="sa-summary-chip">Rétention : 90 jours</span></div><Table headers={['ADMINISTRATEUR', 'ACTION', 'CIBLE', 'HEURE', 'TYPE']} rows={auditRows.map((event) => [<b key="actor">{event.actor}</b>, event.action, event.target, <span className="sa-mono" key="time">{event.time}</span>, <span className="sa-audit-tag" key="kind">{event.kind}</span>])} /><div className="sa-readonly-note"><Icon name="shield" size={15} /> Ce journal d’exemple n’est pas relié à un système d’audit réel.</div></div>}
+
+          {section === 'payouts' && <>
+            <div className="sa-metrics sa-secondary-metrics">
+              <article className="sa-metric"><span className="sa-metric-icon sa-icon-blue"><Icon name="trend" size={18} /></span><small>Volume à reverser</small><strong>14 820 400 <em>FCFA</em></strong><span className="sa-metric-foot">Tous les marchands · aujourd’hui</span></article>
+              <article className="sa-metric"><span className="sa-metric-icon sa-icon-orange"><Icon name="clock" size={18} /></span><small>Lots en attente</small><strong>23</strong><span className="sa-metric-foot">À traiter selon le calendrier</span></article>
+              <article className="sa-metric"><span className="sa-metric-icon sa-icon-green"><Icon name="check" size={18} /></span><small>Versés aujourd’hui</small><strong>8 204 000 <em>FCFA</em></strong><span className="sa-metric-foot">41 lots terminés</span></article>
+            </div>
+            <div className="sa-panel sa-table-panel"><div className="sa-panel-heading"><div><h2>Lots de reversement</h2><p>Suivi des paiements sortants · données de démonstration</p></div><span className="sa-summary-chip">4 lots récents</span></div><Table headers={['LOT', 'MARCHAND', 'MONTANT', 'DESTINATION', 'DATE', 'STATUT']} rows={payoutRows.map((payout) => [<b className="sa-mono" key="batch">{payout.batch}</b>, payout.merchant, <b key="amount">{payout.amount}</b>, payout.method, payout.date, <StatusPill key="status">{payout.status}</StatusPill>])} /><div className="sa-readonly-note"><Icon name="lock" size={15} /> Le rapprochement et le déclenchement réel des reversements ne sont pas disponibles dans cette démo.</div></div>
+          </>}
+
+          {section === 'risk' && <div className="sa-panel sa-table-panel"><div className="sa-panel-heading"><div><h2>Alertes conformité & risques</h2><p>Examens KYC et signaux d’activité · données de démonstration</p></div><span className="sa-summary-chip">2 alertes à examiner</span></div><Table headers={['MARCHAND', 'IDENTIFIANT', 'MOTIF', 'NIVEAU', 'OUVERT LE', 'ÉTAT']} rows={riskRows.map((riskCase) => [<b key="merchant">{riskCase.merchant}</b>, <span className="sa-mono" key="id">{riskCase.id}</span>, riskCase.reason, <span className={`sa-risk-level ${riskCase.level === 'Élevé' ? 'high' : riskCase.level === 'Modéré' ? 'medium' : 'low'}`} key="level">{riskCase.level}</span>, riskCase.opened, <StatusPill key="status">{riskCase.status}</StatusPill>])} /><div className="sa-readonly-note"><Icon name="shield" size={15} /> Les dossiers sont consultables en exemple ; aucune décision KYC ni mesure de compte n’est appliquée.</div></div>}
+
+          {section === 'reports' && <div className="sa-panel sa-table-panel"><div className="sa-panel-heading"><div><h2>Rapports disponibles</h2><p>Exports de supervision agrégés · données de démonstration</p></div><span className="sa-summary-chip">4 rapports</span></div><Table headers={['RAPPORT', 'PÉRIODE', 'PÉRIMÈTRE', 'FORMAT', 'DISPONIBILITÉ']} rows={reportRows.map((report) => [<b key="name">{report.name}</b>, report.period, report.scope, <span className="sa-audit-tag" key="format">{report.format}</span>, <StatusPill key="status">{report.status}</StatusPill>])} /><div className="sa-readonly-note"><Icon name="bars" size={15} /> Les fichiers listés sont des exemples ; aucun export réel n’est généré.</div></div>}
+
+          {section === 'settings' && <>
+            <div className="sa-settings-grid">
+              <article className="sa-panel sa-setting-card"><div className="sa-setting-heading"><span className="sa-metric-icon sa-icon-orange"><Icon name="card" size={18} /></span><span><h2>Commissions plateforme</h2><small>Grille indicative appliquée aux paiements</small></span></div><div className="sa-setting-row"><span>Mobile Money</span><b>2,0 %</b></div><div className="sa-setting-row"><span>Commission minimum</span><b>100 FCFA</b></div><div className="sa-setting-row"><span>Reversement accéléré</span><b>0,5 %</b></div></article>
+              <article className="sa-panel sa-setting-card"><div className="sa-setting-heading"><span className="sa-metric-icon sa-icon-blue"><Icon name="shield" size={18} /></span><span><h2>Limites de paiement</h2><small>Seuils de transaction configurés</small></span></div><div className="sa-setting-row"><span>Montant par transaction</span><b>2 000 000 FCFA</b></div><div className="sa-setting-row"><span>Plafond journalier marchand</span><b>10 000 000 FCFA</b></div><div className="sa-setting-row"><span>Devise de règlement</span><b>XOF · FCFA</b></div></article>
+              <article className="sa-panel sa-setting-card"><div className="sa-setting-heading"><span className="sa-metric-icon sa-icon-green"><Icon name="globe" size={18} /></span><span><h2>Opérateurs connectés</h2><small>État des intégrations partenaires</small></span></div>{operators.map((operator) => <div className="sa-setting-row" key={operator.key}><span className="sa-setting-operator"><OperatorLogo operator={operator.key} size={20} />{operator.name}</span><StatusPill>{operator.status}</StatusPill></div>)}</article>
+              <article className="sa-panel sa-setting-card"><div className="sa-setting-heading"><span className="sa-metric-icon sa-icon-purple"><Icon name="switch" size={18} /></span><span><h2>Environnements</h2><small>Configuration des espaces de paiement</small></span></div><div className="sa-setting-row"><span>Sandbox</span><StatusPill>Actif</StatusPill></div><div className="sa-setting-row"><span>Production</span><StatusPill>Actif</StatusPill></div><div className="sa-setting-row"><span>Mode de cette console</span><b>Lecture seule</b></div></article>
+            </div>
+            <div className="sa-readonly-note sa-settings-note"><Icon name="lock" size={15} /> Les paramètres sont affichés à titre indicatif. Leur modification nécessite une authentification, des permissions serveur et un journal d’audit réel.</div>
+          </>}
 
           <footer className="sa-footer"><span>KwêTché Pay · Console Super Admin</span><span><i /> Interface de démonstration en lecture seule</span><Link href="/">Retour au site public <Icon name="arrow" size={14} /></Link></footer>
         </div>

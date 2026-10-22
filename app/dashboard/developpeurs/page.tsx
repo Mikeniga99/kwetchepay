@@ -187,17 +187,22 @@ export default function DashboardDevelopersPage() {
 
         <form onSubmit={handleSaveWebhook}>
           <div className="form-group" style={{ marginBottom: '16px' }}>
-            <label htmlFor="wh-url">URL de votre serveur (Endpoint)</label>
+            <label htmlFor="wh-url">URL de votre serveur (Endpoint {isLive ? 'Production' : 'Simulation'})</label>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                className="form-control"
-                id="wh-url"
-                type="url"
-                required
-                value={webhookUrl}
-                onChange={(e) => setWebhookUrl(e.target.value)}
-                style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '13px' }}
-              />
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input
+                  className="form-control"
+                  id="wh-url"
+                  type="url"
+                  required
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '13px', paddingLeft: '45px' }}
+                />
+                <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', background: isLive ? 'var(--navy)' : 'var(--orange)', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
+                  {isLive ? 'LIVE' : 'TEST'}
+                </div>
+              </div>
               <button
                 type="submit"
                 className="button button-primary"

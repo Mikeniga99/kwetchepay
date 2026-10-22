@@ -21,22 +21,22 @@ export function Footer() {
           <b>Entreprise</b>
           <Link href="/">À propos</Link>
           <Link href="/contact">Contact</Link>
-          <Link href="/contact">Partenaires</Link>
-          <Link href="/contact">Carrières</Link>
+          <a href="mailto:contact@kwetchepay.bj?subject=Partenariat%20Kw%C3%AATch%C3%A9%20Pay">Partenaires</a>
+          <a href="mailto:contact@kwetchepay.bj?subject=Candidature%20Kw%C3%AATch%C3%A9%20Pay">Carrières</a>
         </div>
         <div className="footer-column">
           <b>Ressources</b>
           <Link href="/developpeurs">Documentation API</Link>
           <Link href="/securite">Sécurité & Conformité</Link>
-          <Link href="/contact">Statut des services</Link>
-          <Link href="/contact">Centre d’aide</Link>
+          <a href="mailto:contact@kwetchepay.bj?subject=Statut%20des%20services">Statut des services</a>
+          <a href="mailto:contact@kwetchepay.bj?subject=Demande%20d%E2%80%99aide">Centre d’aide</a>
         </div>
         <div className="footer-column">
           <b>Légal</b>
-          <Link href="/contact">Confidentialité</Link>
-          <Link href="/contact">Conditions d&apos;utilisation</Link>
-          <Link href="/contact">Mentions légales</Link>
-          <Link href="/contact">Cookies</Link>
+          <a href="mailto:contact@kwetchepay.bj?subject=Politique%20de%20confidentialit%C3%A9">Confidentialité</a>
+          <a href="mailto:contact@kwetchepay.bj?subject=Conditions%20d%E2%80%99utilisation">Conditions d&apos;utilisation</a>
+          <a href="mailto:contact@kwetchepay.bj?subject=Mentions%20l%C3%A9gales">Mentions légales</a>
+          <a href="mailto:contact@kwetchepay.bj?subject=Politique%20relative%20aux%20cookies">Cookies</a>
         </div>
       </div>
       <div className="container footer-bottom">

@@ -139,6 +139,47 @@ export default function DashboardSettingsPage() {
             </form>
           </div>
 
+          {/* Section KYC / Documents */}
+          <div className="dash-panel">
+            <div className="dash-panel-header">
+              <div>
+                <h3 style={{ margin: 0 }}>Vérification de l'entreprise (KYC)</h3>
+                <small style={{ color: 'var(--muted)', fontSize: '11px' }}>Documents requis pour activer les reversements vers votre compte bancaire</small>
+              </div>
+              <span className="pill-badge" style={{ background: '#fff3e0', color: '#e65100', border: '1px solid #ffcc80' }}>
+                En cours de vérification
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '10px' }}>
+              {[
+                { label: 'Certificat IFU', status: 'Validé', date: '12/10/2026', icon: 'check' },
+                { label: 'Registre de Commerce (RCCM)', status: 'Validé', date: '12/10/2026', icon: 'check' },
+                { label: 'Pièce d\'identité (Gérant)', status: 'En attente', date: 'En attente', icon: 'clock' },
+                { label: 'Relevé d\'Identité Bancaire', status: 'Non fourni', date: '-', icon: 'x' },
+              ].map((doc, i) => (
+                <div key={i} style={{ padding: '12px', border: '1px solid var(--line)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '32px', height: '32px', borderRadius: '8px',
+                    background: doc.status === 'Validé' ? '#dcfce7' : doc.status === 'En attente' ? '#fef3c7' : '#f3f4f6',
+                    display: 'grid', placeItems: 'center', color: doc.status === 'Validé' ? '#166534' : '#92400e'
+                  }}>
+                    <Icon name={doc.icon as any} size={16} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700 }}>{doc.label}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--muted)' }}>{doc.status} • {doc.date}</div>
+                  </div>
+                  {doc.status !== 'Validé' && (
+                    <button style={{ border: 'none', background: 'none', color: 'var(--orange)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>
+                      Scanner
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Team Members Panel */}
         <div className="dash-panel">
           <div className="dash-panel-header">

@@ -4,18 +4,20 @@ import { Icon } from '@/components/Icon'
 import { OperatorLogo } from '@/components/OperatorLogo'
 import { useState } from 'react'
 
-type Period = 'oct2026' | 'sep2026' | 'q3'
+type Period = 'oct2026' | 'sep2026' | 'q3' | 'year2026'
 
 const PERIODS: { value: Period; label: string }[] = [
   { value: 'oct2026', label: 'Octobre 2026' },
   { value: 'sep2026', label: 'Septembre 2026' },
   { value: 'q3', label: 'Trimestre 3 (2026)' },
+  { value: 'year2026', label: 'Année 2026' },
 ]
 
 const PERIOD_DATA: Record<Period, { volume: number; transactions: number; successRate: number }> = {
   oct2026: { volume: 8472500, transactions: 1284, successRate: 96.8 },
   sep2026: { volume: 7901200, transactions: 1197, successRate: 95.4 },
   q3: { volume: 22650000, transactions: 3438, successRate: 96.1 },
+  year2026: { volume: 78450000, transactions: 11840, successRate: 94.2 },
 }
 
 const MONTHLY_TRENDS = [
@@ -167,6 +169,53 @@ export default function RapportsPage() {
                 <div className="op-amount" style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>{op.amount.toLocaleString()} FCFA</div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tendance Transactions & Taux de Succès */}
+      <div className="dash-panel" style={{ marginTop: '24px' }}>
+        <div className="dash-panel-header">
+          <div>
+            <h3>Santé des paiements</h3>
+            <small style={{ color: 'var(--muted)', fontSize: '11px' }}>Corrélation entre volume et taux de succès sur les 6 derniers mois</small>
+          </div>
+        </div>
+
+        <div style={{ height: '220px', position: 'relative', marginTop: '20px', display: 'flex', alignItems: 'flex-end', gap: '2px' }}>
+           {/* Axe Y simulé */}
+           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 25, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '1px solid #f0f0f0', zIndex: 0 }}>
+              {[100, 75, 50, 25, 0].map(v => (
+                <div key={v} style={{ width: '100%', borderBottom: '1px solid #f8f8f8', height: '1px', position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '-30px', top: '-6px', fontSize: '9px', color: '#ccc' }}>{v}%</span>
+                </div>
+              ))}
+           </div>
+
+           {/* Barres de Succès */}
+           <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-around', alignItems: 'flex-end', zIndex: 1, paddingLeft: '10px' }}>
+              {[
+                { m: 'Mai', s: 92, v: 45 }, { m: 'Juin', s: 95, v: 55 }, { m: 'Juil', s: 88, v: 65 },
+                { m: 'Août', s: 98, v: 75 }, { m: 'Sep', s: 96, v: 85 }, { m: 'Oct', s: 97, v: 95 }
+              ].map((d, i) => (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '160px', width: '100%', justifyContent: 'center' }}>
+                    {/* Barre de volume (Bleu clair) */}
+                    <div style={{ width: '12px', height: `${d.v}%`, background: '#e0e7ff', borderRadius: '4px 4px 0 0' }} title={`Volume: ${d.v}%`} />
+                    {/* Barre de succès (Vert) */}
+                    <div style={{ width: '12px', height: `${d.s}%`, background: '#10b981', borderRadius: '4px 4px 0 0' }} title={`Succès: ${d.s}%`} />
+                  </div>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)' }}>{d.m}</span>
+                </div>
+              ))}
+           </div>
+        </div>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '15px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+            <div style={{ width: '10px', height: '10px', background: '#e0e7ff', borderRadius: '2px' }} /> Volume
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+            <div style={{ width: '10px', height: '10px', background: '#10b981', borderRadius: '2px' }} /> Taux de Succès (%)
           </div>
         </div>
       </div>

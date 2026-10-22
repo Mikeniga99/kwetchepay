@@ -1,91 +1,127 @@
-# KwêTché Pay 🚀💳
+# KwêTché Pay — Front-end
 
-> **L’infrastructure de paiement souveraine pour les entreprises qui font avancer le Bénin et l’Afrique de l’Ouest.**
+Interface web de KwêTché Pay, construite avec Next.js App Router, React et TypeScript. Le dépôt contient le site public, des interfaces de démonstration pour les espaces marchand et super administrateur, ainsi que les éléments visuels partagés.
 
-KwêTché Pay est une plateforme fintech unifiée permettant aux entreprises, marchands et développeurs d'encaisser les paiements **Mobile Money (MTN MoMo, Moov Money, Celtiis Cash)** et cartes bancaires via une console unique, sécurisée et conforme aux normes UEMOA.
+> **État du projet :** le front-end est une maquette interactive. Les données affichées sont locales ou simulées. Les connexions, paiements, reversements, demandes de compte, alertes et réglages ne sont pas reliés à un service de production.
 
----
+## Prérequis
 
-## 🎨 Identité Visuelle & Charte Graphique
-- **Bleu Nuit** : `#0E3864` (RVB : 14, 56, 100) — Confiance institutionnelle & sécurité bancaire
-- **Orange Vif** : `#FD6D00` (RVB : 253, 109, 0) — Énergie, vitalité & inclusion financière
-- **Noir Neutre** : `#000000` (RVB : 0, 0, 0) — Rigueur typographique & lisibilité
-- **Emblème** : Fusion du portefeuille numérique (*wallet*) avec le « K » central et les gravures traditionnelles béninoises.
+- Node.js 20 ou une version LTS plus récente
+- npm
 
----
+Le dépôt contient `package-lock.json`. Utiliser `npm ci` pour installer les versions verrouillées.
 
-## ⚡ Fonctionnalités Clés
-- **Portail d'Authentification Glossy Liquid Glass** : Carte glassmorphism ultra-moderne avec commutateur d'onglets instantané (*Connexion* ↔ *Inscription*) et adaptation responsive parfaite sur mobile.
-- **Arrière-plan Vivant FinTech (Scène Ganvié Neo-Pirogue)** : Moteur d'animation 120 FPS ultra-léger en Canvas/CSS avec pirogue à réacteurs vers la lune KwêTché, poissons dorés et pluie de billets FCFA (10 000, 5 000, 2 000 F) et pièces de monnaie 500 F.
-- **Tableau de Bord Marchand** : Vue synthétique des volumes encaissés, reversements bancaires/Mobile Money et gestion des clés API Sandbox / Production.
-- **Support Télécom Bénin & UEMOA** : Gestion stricte des numéros à 10 chiffres (`+229 01 XX XX XX XX`).
+## Installation et commandes
 
----
-
-## 🛠️ Stack Technique
-- **Framework** : [Next.js 15](https://nextjs.org/) (App Router)
-- **Bibliothèque UI** : [React 19](https://react.dev/)
-- **Langage** : [TypeScript](https://www.typescriptlang.org/)
-- **Styles** : [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla Modern CSS
-- **Typographie** : Manrope & DM Mono via `next/font`
-
----
-
-## 🚀 Démarrage Rapide
-
-### Prérequis
-- Node.js 18+ ou 20+
-- npm ou pnpm
-
-### Installation & Lancement
 ```bash
-# Installer les dépendances
-npm install
-
-# Démarrer le serveur de développement
+npm ci
 npm run dev
-
-# Ouvrir http://localhost:3000
 ```
 
-### Compilation pour la production
-```bash
-npm run build
-npm start
+Le serveur de développement est accessible sur <http://localhost:3000>.
+
+| Commande | Utilité |
+| --- | --- |
+| `npm run dev` | Lance le serveur de développement Next.js. |
+| `npm run lint` | Vérifie les types TypeScript avec `tsc --noEmit`. Ce script ne lance pas ESLint. |
+| `npm run build` | Compile et pré-rend le site pour la production. |
+| `npm start` | Sert le build de production après `npm run build`. |
+
+Aucun script `test` ni suite de tests automatisés n’est actuellement défini dans `package.json`.
+
+## Routes front-end
+
+### Site public
+
+| Route | Contenu |
+| --- | --- |
+| `/` | Accueil, présentation et aperçu du tableau de bord. |
+| `/solutions` | Présentation des solutions. |
+| `/marchands` | Présentation de l’espace marchand. |
+| `/developpeurs` | Présentation technique et documentation front-end. |
+| `/securite` | Présentation de l’approche sécurité. |
+| `/tarifs` | Présentation des offres. |
+| `/contact` | Portail de demande de compte. |
+| `/connexion` | Portail de connexion de démonstration. |
+
+### Espace marchand de démonstration
+
+| Route | Contenu |
+| --- | --- |
+| `/dashboard` | Vue d’ensemble et indicateurs. |
+| `/dashboard/transactions` | Liste et détails des transactions simulées. |
+| `/dashboard/liens` | Gestion locale de liens de paiement de démonstration. |
+| `/dashboard/reversements` | Historique et formulaire de reversement de démonstration. |
+| `/dashboard/clients` | Contacts, historique exemple, export CSV local et ajout temporaire de contact. |
+| `/dashboard/rapports` | Indicateurs et exports de démonstration. |
+| `/dashboard/developpeurs` | Clés et outils d’intégration de démonstration. |
+| `/dashboard/parametres` | Paramètres marchands de démonstration. |
+
+### Console super administrateur
+
+`/super-admin` présente une interface de supervision en lecture seule avec des données d’exemple. Ce parcours est uniquement visuel : il n’applique aucune décision ni modification de compte.
+
+## Organisation du code
+
+```text
+app/
+  layout.tsx                 Layout racine, polices, métadonnées et styles globaux
+  page.tsx                   Accueil
+  globals.css                Styles globaux, composants et responsive
+  dashboard/                 Layout et pages de l’espace marchand
+  super-admin/               Console de démonstration en lecture seule
+  connexion/ contact/        Portails d’authentification et d’inscription
+  solutions/ marchands/      Pages publiques
+  developpeurs/ securite/ tarifs/
+components/
+  Header.tsx, Footer.tsx     Navigation publique
+  SiteShell.tsx              Composition des layouts selon la route
+  AuthGlassPortal.tsx        Portail connexion/inscription
+  HeroWeatherBackground.tsx  Arrière-plan animé partagé
+  FintechLiveBackground.tsx  Scène visuelle du fleuve et de la pirogue
+  DashboardPreview.tsx       Aperçu du tableau de bord sur le site public
+  OperatorLogo.tsx           Logos des opérateurs
+lib/
+  dashboard-data.ts          Données d’exemple du tableau de bord
+public/                       Logos, icônes et images statiques
 ```
 
----
+Les pages publiques et les interfaces du tableau de bord réutilisent des composants de `components/`. `SiteShell` affiche l’en-tête et le pied de page publics, et laisse les espaces dashboard et super admin gérer leur propre cadre d’interface.
 
-## ✅ Étapes réalisées
+## Système visuel et animations
 
-### Étape 1 à 3 — Fondations & Dashboard
-- Mise en place de l'identité visuelle (Bleu Nuit & Orange KwêTché).
-- Dashboard complet avec KPIs en temps réel et graphiques de performance.
-- Intégration des logos opérateurs (MTN, Moov, Celtiis) et validation des numéros béninois.
+- Couleurs principales : bleu nuit `#0E3864` et orange `#FD6D00`.
+- Polices : Manrope pour l’interface et DM Mono pour les références et données techniques, chargées avec `next/font`.
+- Les styles sont principalement écrits en CSS dans `app/globals.css`, avec quelques styles locaux dans les composants.
+- L’arrière-plan météo alterne pluie, soleil et nuit sur les héros et les pages connexion/inscription. La scène conserve le fleuve et la pirogue. Les éléments de décor sont réalisés côté navigateur ; l’animation respecte la préférence système de réduction des mouvements.
+- Les images et logos servis localement se trouvent dans `public/`.
 
-### Étape 4 — Optimisation des Flux Financiers
-- **Simulateur de frais interactif** : Calcul immédiat des frais bancaires (fixes) et Mobile Money (1%).
-- **Planification automatique** : Gestion des fréquences de reversement (Quotidien, Hebdomadaire, Mensuel).
-- **Historique enrichi** : Suivi précis des transactions avec statuts visuels animés (Succès, Traitement, Échec).
+## Données et comportements de démonstration
 
-### Améliorations Design & UX
-- **Navigation corrigée** : Correction des problèmes d'encodage et typographie.
-- **Interface Adaptive** : Alignement du sélecteur d'environnement (Test/Prod) en mode "Glassmorphism".
-- **Logo Dynamique** : Visibilité optimisée du logo sur fonds sombres (mode *light*).
-- **Épuration UI** : Simplification du portail d'authentification pour une conversion maximale.
-- **Layout Persistant** : Barre latérale fixée au défilement pour un accès permanent aux outils.
+Les interactions locales servent à présenter les parcours et ne doivent pas être interprétées comme des opérations réelles :
 
-### Finalisation & Conformité Régionale (Dernière étape)
-- **Validation USSD Stricte** : Mise en conformité des numéros béninois (préfixe `01` obligatoire).
-- **Documentation Technique** : Intégration des snippets de vérification de signature HMAC pour les webhooks.
-- **Accessibilité Mobile** : Optimisation des tables à colonnes multiples pour les écrans ultra-compacts.
+- La connexion ne vérifie pas d’identifiants et mène au dashboard de démonstration.
+- L’inscription affiche une confirmation locale, sans transmettre la demande.
+- Les chiffres, transactions, clients, statuts opérateurs et éléments super admin sont des exemples codés dans le front.
+- Les sélecteurs Sandbox/Production et les clés API affichées ne pilotent pas de vrais environnements.
+- Certaines actions (paiement Mobile Money, remboursement, reversement, webhooks et exports PDF/Excel) sont simulées. L’export de la liste Clients produit un CSV à partir des données visibles ; un contact ajouté n’existe qu’en mémoire jusqu’au rechargement de la page.
+- Les liens d’aide, de partenariat, de statut et de demande de documents légaux ouvrent un message e-mail prérempli. Les pages et contenus juridiques officiels restent à fournir.
 
-### Étape 5 — Branding & Expérience Client
-- **Studio de Personnalisation** : Interface de branding avec couleur dynamique et **Live Receipt Preview** sur châssis mobile simulé.
-- **Console Développeur** : Gestion des clés API (Test/Live) et simulateur de Webhooks avec inspecteur JSON thémé.
-- **Carnet de Payeurs** : Système d'avatars, historique client et relances multicanales (WhatsApp/SMS).
+Ne pas utiliser les données ou les formulaires de démonstration pour traiter de vrais paiements, gérer des comptes ou prendre des décisions opérationnelles.
 
----
+## Déploiement sur Vercel
 
-## 📄 Licence
+Le projet utilise Next.js et un `package-lock.json`, sans configuration Vercel personnalisée. Vercel peut détecter le framework et utiliser la configuration de build standard :
+
+- Framework : Next.js
+- Installation : `npm ci` (déduite de `package-lock.json`)
+- Build : `npm run build`
+- Répertoire de sortie : valeur par défaut de Next.js/Vercel
+
+Aucune variable d’environnement n’est requise par le front-end actuel. Configurer dans les paramètres Vercel tout secret ou toute URL de service ajoutés ultérieurement ; ne jamais exposer de secret dans une variable `NEXT_PUBLIC_*`.
+
+Avant une mise en ligne, vérifier le déploiement Preview sur Vercel, les routes publiques et les parcours responsive sur mobile. Un build local réussi valide la compilation, mais ne remplace pas une vérification sur le projet Vercel et son domaine.
+
+## Licence
+
 Tous droits réservés © 2026 KwêTché Pay — République du Bénin.
