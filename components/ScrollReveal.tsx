@@ -8,30 +8,35 @@ export function ScrollReveal() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Diffère l'attachement de l'observer après l'hydratation complète de React
     let observer: IntersectionObserver | null = null
 
-    const timer = setTimeout(() => {
+    // S'assure que React a complètement fini d'hydrater tout l'arbre DOM
+    const startObserver = () => {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               const el = entry.target as HTMLElement
-              el.setAttribute('data-visible', 'true')
               el.classList.add('visible')
+              el.setAttribute('data-visible', 'true')
             }
           })
         },
-        { threshold: 0.12 },
+        { threshold: 0.08 },
       )
 
       document.querySelectorAll('.observe').forEach((element) => {
         observer?.observe(element)
       })
-    }, 120)
+    }
+
+    // Utilise requestIdleCallback ou un délai sécurisé après hydratation complète
+    const frameId = requestAnimationFrame(() => {
+      setTimeout(startObserver, 300)
+    })
 
     return () => {
-      clearTimeout(timer)
+      cancelAnimationFrame(frameId)
       observer?.disconnect()
     }
   }, [pathname])

@@ -7,11 +7,13 @@ export function Button({
   variant = 'primary',
   href = '/contact',
   className = '',
+  onClick,
 }: {
   children: ReactNode
   variant?: 'primary' | 'secondary' | 'light'
   href?: string
   className?: string
+  onClick?: () => void
 }) {
   const classes = `button button-${variant} ${className}`.trim()
   const content = (
@@ -23,14 +25,14 @@ export function Button({
 
   if (href.startsWith('/')) {
     return (
-      <Link className={classes} href={href}>
+      <Link className={classes} href={href} onClick={onClick}>
         {content}
       </Link>
     )
   }
 
   return (
-    <a className={classes} href={href}>
+    <a className={classes} href={href} onClick={onClick}>
       {content}
     </a>
   )

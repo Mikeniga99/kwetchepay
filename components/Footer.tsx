@@ -40,7 +40,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© 2026 KwêTché Pay. Tous droits réservés.</span>
+        <span>© 2026 360Dev. Tous droits réservés.</span>
         <span className="footer-status"><i /> Tous les systèmes sont opérationnels</span>
         <span>Une société associée à GoRéparr</span>
       </div>

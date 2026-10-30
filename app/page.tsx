@@ -1,7 +1,6 @@
 import { Button } from '@/components/Button'
 import { CodeWindow } from '@/components/CodeWindow'
-import { DashboardPreview } from '@/components/DashboardPreview'
-import { HeroWeatherBackground } from '@/components/HeroWeatherBackground'
+import { HeroVideo } from '@/components/HeroVideo'
 import { Icon, type IconName } from '@/components/Icon'
 import { Logo } from '@/components/Logo'
 import { OperatorLogo } from '@/components/OperatorLogo'
@@ -24,7 +23,7 @@ export default function Home() {
   return (
     <main>
       <section className="hero" id="accueil">
-          <HeroWeatherBackground />
+          <HeroVideo />
           <div className="container hero-content">
             <div className="hero-copy">
               <h1 className="reveal">Tous vos paiements.<br /><em>Une seule plateforme.</em></h1>
@@ -38,7 +37,6 @@ export default function Home() {
                 <span><Icon name="check" size={16} /> Sans engagement</span>
               </div>
             </div>
-            <DashboardPreview />
           </div>
           <div className="trust-strip">
             <div className="container trust-inner">
@@ -180,7 +178,7 @@ export default function Home() {
 
         <section className="cta-section" id="contact">
           <div className="cta-pattern" />
-          <div className="container cta-content observe">
+          <div className="container cta-content observe" suppressHydrationWarning>
             <span className="kicker kicker-light">PRÊT À DÉMARRER ?</span>
             <h2>Faites circuler votre activité.</h2>
             <p>Rejoignez les entreprises qui préparent la prochaine génération des paiements au Bénin.</p>
@@ -190,6 +188,20 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Section de célébration avec effet rideau/tiroir (dévoilement physique par le défilement) */}
+        <div className="celebration-curtain-wrapper">
+          <section className="celebration-curtain" aria-label="Célébration KwêTché Pay">
+            <div className="celebration-curtain-bg" />
+            <div className="celebration-curtain-overlay" />
+            <div className="container celebration-curtain-content">
+              <span className="celebration-badge">
+                <Icon name="check" size={14} /> 100% Mobile Money Bénin & UEMOA
+              </span>
+              <h3>Rejoignez la révolution des paiements</h3>
+            </div>
+          </section>
+        </div>
       </main>
   )
 }
