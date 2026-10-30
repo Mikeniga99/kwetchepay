@@ -1,84 +1,57 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function HeroVideo() {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null)
-  const [saveData, setSaveData] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    // Détecte si l'utilisateur a activé le mode économie de données
-    const connection = (navigator as unknown as { connection?: { saveData?: boolean } }).connection
-    if (connection?.saveData) {
-      setSaveData(true)
-    }
-
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    // Ajuste l'affiche selon la largeur écran
+    if (window.innerWidth <= 768) {
+      video.poster = '/images/poster-mobile.webp'
+    }
 
     video.defaultMuted = true
     video.muted = true
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    const playPromise = video.play()
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // iOS a bloqué la lecture auto (mode économie d'énergie, réseau lent, etc.)
-        // On masque l'élément vidéo pour éviter que Safari n'affiche son bouton Play gris,
-        // et le fond d'écran WebP prend le relais de façon transparente.
-        video.style.opacity = '0'
-      })
-    }
-  }, [isMobile, saveData])
-
-  const posterImage = isMobile
-    ? '/images/poster-mobile.webp'
-    : '/images/poster-desktop.webp'
-
-  const videoSrc = isMobile
-    ? '/images/arrieremobile.mp4'
-    : '/images/arriereplan.mp4'
+    // Démarre la lecture automatique
+    video.play().catch(() => {
+      // Si la lecture automatique est bloquée par le navigateur,
+      // l'affiche 'poster' reste visible de manière nette et fluide.
+    })
+  }, [])
 
   return (
-    <div
-      className="hero-video-wrap"
-      aria-hidden="true"
-      style={{
-        backgroundImage: `url(${posterImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center 40%',
-      }}
-    >
+    <div className="hero-video-wrap" aria-hidden="true">
       <video
         ref={videoRef}
-        key={isMobile ? 'mobile' : 'desktop'}
         className="hero-video-bg"
-        autoPlay={!saveData}
+        autoPlay
         muted
         loop
         playsInline
         preload="auto"
-        poster={posterImage}
+        poster="/images/poster-desktop.webp"
         disablePictureInPicture
         disableRemotePlayback
       >
-        {isMobile !== null && !saveData && (
-          <source src={videoSrc} type="video/mp4" />
-        )}
+        <source
+          src="/images/arrieremobile.mp4"
+          type="video/mp4"
+          media="(max-width: 768px)"
+        />
+        <source
+          src="/images/arriereplan.mp4"
+          type="video/mp4"
+        />
       </video>
 
-      {/* Overlay bleu nuit semi-transparent pour lisibilité */}
+      {/* Overlay dégradé cinématographique pour la lisibilité */}
       <div className="hero-video-overlay" />
     </div>
   )
