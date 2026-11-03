@@ -136,6 +136,22 @@ h1 em { font-style: normal; color: var(--orange); }
   opacity: 1;
 }
 
+.hero-video-desktop { 
+  display: block; 
+}
+.hero-video-mobile { 
+  display: none; 
+}
+
+@media (max-width: 768px), (orientation: portrait) and (max-width: 1024px) {
+  .hero-video-desktop { 
+    display: none !important; 
+  }
+  .hero-video-mobile { 
+    display: block !important; 
+  }
+}
+
 /* Masquer tout contrôle natif ou bouton Play (iOS Safari, Chrome, WebKit, Gecko) */
 .hero-video-bg::-webkit-media-controls,
 .hero-video-bg::-webkit-media-controls-enclosure,
